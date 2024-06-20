@@ -1,7 +1,7 @@
-const app = require('./app');
-const connectwithDb = require('./config/db');
+const app = require("./app");
+const connectwithDb = require("./config/db");
 require("dotenv").config();
-const cloudinary=require('cloudinary').v2
+const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
 
 // connection with db
@@ -12,6 +12,7 @@ const corsOptions = {
     "http://localhost:5174",
     "http://localhost:5173",
     "https://food-order12.vercel.app",
+    "https://food-order-admin-two.vercel.app/",
   ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   preflightContinue: false,
@@ -19,16 +20,12 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-
-
 cloudinary.config({
   cloud_name: process.env.cloud_name,
   api_key: process.env.api_key,
-  api_secret:process.env.api_secret
-})
+  api_secret: process.env.api_secret,
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on ${process.env.PORT} `);
 });
-
-
