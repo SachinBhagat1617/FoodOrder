@@ -7,7 +7,7 @@ const initialState = {
   token: "",
   showLogin: false,
   totProduct: 0,
-  url: "https://food-order-red.vercel.app",
+  url: "https://food-order-red.vercel.app/api/v1",
   foodlist: [],
   fetchdata: [],
   TotalProductAdded: 0,
