@@ -6,7 +6,7 @@ import Listitem from "./components/Listitem";
 import Orders from "./components/Orders";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-const url = "http://localhost:4000/api/v1";
+const url = "https://food-order-red.vercel.app/api/v1";
 const appRouter = createBrowserRouter([
   {
     path: "/",
