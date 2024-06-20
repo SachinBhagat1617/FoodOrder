@@ -49,8 +49,8 @@ const userRouter = require("./Routes/userRoute");
 const CartRouter = require("./Routes/CartRoute");
 const OrderRouter = require("./Routes/OrderRoute");
 //router for middleware
-app.use("/api/v1/", FoodList);
-app.use("/api/v1/", userRouter);
+app.use("/api/v1", FoodList);
+app.use("/api/v1", userRouter);
 app.use("/api/v1", CartRouter);
 app.use("/api/v1", OrderRouter);
 //routes
