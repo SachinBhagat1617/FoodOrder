@@ -15,7 +15,7 @@ const corsOptions = {
     "http://localhost:5174",
     "http://localhost:5173",
     "https://food-order12.vercel.app",
-    "https://food-order-admin-two.vercel.app/",
+    "https://food-order-admin-two.vercel.app",
   ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   preflightContinue: false,
