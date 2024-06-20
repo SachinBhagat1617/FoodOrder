@@ -1,18 +1,39 @@
 const express = require("express");
-const cookieParser=require("cookie-parser")
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
+const helmet = require("helmet");
+const morgan = require("morgan");
+
 //app config
 const app = express();
 
+const corsOptions = {
+  origin: ["http://localhost:5174", "http://localhost:5173"],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+
 //middleware
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'none'"],
+      fontSrc: ["'self'", "data:"],
+    },
+  })
+);
 app.use(express.json()); // app.use to mount the routes
-app.use(cors());
+app.use(cors(corsOptions));
+app.use(morgan("tiny"));
+
 app.use(cookieParser()); // to access token from cookies
 app.use(
   fileUpload({
     useTempFiles: true,
-    tempFileDir: "/tmp",
+    tempFileDir: path.join("/tmp"),
   })
 );
 
@@ -20,10 +41,12 @@ app.use(
 const FoodList = require("./Routes/FoodList");
 const userRouter = require("./Routes/userRoute");
 const CartRouter = require("./Routes/CartRoute");
+const OrderRouter = require("./Routes/OrderRoute");
 //router for middleware
 app.use("/api/v1/", FoodList);
 app.use("/api/v1/", userRouter);
 app.use("/api/v1", CartRouter);
+app.use("/api/v1", OrderRouter);
 //routes
 app.get("/", (req, res) => {
   res.send("API is working");

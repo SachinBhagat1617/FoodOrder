@@ -3,65 +3,73 @@ import axios from "axios";
 
 const initialState = {
   category: "all",
-  productAdded: [
-    {
-      id: "",
-      quantity: 0,
-      name: "",
-      price: 0,
-    },
-  ],
+  productAdded: [],
   token: "",
   showLogin: false,
   totProduct: 0,
   url: "http://localhost:4000/api/v1",
   foodlist: [],
-  fetchdata:[],
+  fetchdata: [],
+  TotalProductAdded: 0,
 };
-const addCartData = async (id, token) => {
-  //console.log(id);
-  const response = await axios.post("http://localhost:4000/api/v1/add", { itemId:id }, {headers:{token}}); // {headers:{token}} header mai token dala/post kia
-  //console.log(response)
-}
-const decreaseCartData = async(id, token)=> {
-  const response = await axios.post("http://localhost:4000/api/v1/remove", { itemId:id }, {headers:{token}});
-}
+
+const addCartData = async (id, name, quantity, price, token) => {
+  const data = {
+    id,
+    name,
+    quantity,
+    price,
+  };
+  await axios.post("http://localhost:4000/api/v1/add", data, {
+    headers: { token },
+  });
+};
+
+const decreaseCartData = async (id, name, quantity, price, token) => {
+  const data = {
+    id,
+    name,
+    quantity,
+    price,
+  };
+  await axios.post("http://localhost:4000/api/v1/remove", data, {
+    headers: { token },
+  });
+};
 
 const categorySlice = createSlice({
   name: "categorySlice",
   initialState,
   reducers: {
     setCategory: (state, action) => {
-      if (state.category === action.payload) {
-        state.category = "all";
-      } else state.category = action.payload;
+      state.category =
+        state.category === action.payload ? "all" : action.payload;
     },
-    addProduct:  (state, action) => {
-      // payload mai id,name, price ek object mai  aayega
-      let flag = 0;
-      for (let index = 0; index < state.productAdded.length; index++) {
-        if (state.productAdded[index].id == action.payload.id) {
-          state.productAdded[index].quantity =
-            state.productAdded[index].quantity + 1;
-          state.productAdded[index].price =
-            state.productAdded[index].price *
-            state.productAdded[index].quantity;
-
-          flag = 1;
-          break;
-        }
-      }
-      if (flag == 0) {
-        const obj = {
+    addProduct: (state, action) => {
+      const existingProduct = state.productAdded.find(
+        (product) => product.id === action.payload.id
+      );
+      if (existingProduct) {
+        existingProduct.quantity += 1;
+        existingProduct.price =
+          existingProduct.price * existingProduct.quantity;
+      } else {
+        state.productAdded.push({
           id: action.payload.id,
-          quantity: action.payload.quantity + 1,
+          quantity: 1,
           name: action.payload.name,
           price: action.payload.price,
-        };
-        state.productAdded.push(obj);
+        });
       }
+      state.TotalProductAdded += 1;
       if (state.token) {
-        addCartData(action.payload.id, state.token);
+        addCartData(
+          action.payload.id,
+          action.payload.name,
+          1,
+          action.payload.price,
+          state.token
+        );
       }
     },
     decreaseProduct: (state, action) => {
@@ -71,32 +79,56 @@ const categorySlice = createSlice({
       if (existingProduct) {
         if (existingProduct.quantity > 1) {
           existingProduct.quantity -= 1;
+          state.TotalProductAdded -= 1;
         } else {
           state.productAdded = state.productAdded.filter(
             (product) => product.id !== action.payload.id
           );
+          state.TotalProductAdded -= 1;
         }
       }
       if (state.token) {
-        decreaseCartData(action.payload.id, state.token);
+        decreaseCartData(
+          action.payload.id,
+          action.payload.name,
+          1,
+          action.payload.price,
+          state.token
+        );
       }
     },
-    setLogin: (state, action) => {
+    setLogin: (state) => {
       state.showLogin = !state.showLogin;
     },
     removeProduct: (state, action) => {
-      state.productAdded = state.productAdded.filter(
-        (product) => product.id !== action.payload.id
+      const product = state.productAdded.find(
+        (product) => product.id === action.payload.id
       );
-      
+      if (product) {
+        state.TotalProductAdded -= product.quantity;
+        state.productAdded = state.productAdded.filter(
+          (product) => product.id !== action.payload.id
+        );
+      }
     },
     setToken: (state, action) => {
       state.token = action.payload;
     },
     setFoodlist: (state, action) => {
-      action.payload.map((item, index) => {
-        state.foodlist.push(item);
-      });
+      state.foodlist = action.payload;
+    },
+    setProductAdded: (state, action) => {
+      state.productAdded = action.payload;
+      state.TotalProductAdded = action.payload.reduce(
+        (total, product) => total + product.quantity,
+        0
+      );
+    },
+    getTotalProductAdded: (state) => {
+      state.TotalProductAdded = state.productAdded.reduce(
+        (total, product) => total + product.quantity,
+        0
+      );
     },
   },
 });
@@ -107,8 +139,10 @@ export const {
   decreaseProduct,
   setLogin,
   removeProduct,
-  totalProductAdded,
   setToken,
   setFoodlist,
+  setProductAdded,
+  getTotalProductAdded,
 } = categorySlice.actions;
+
 export default categorySlice.reducer;

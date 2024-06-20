@@ -8,6 +8,7 @@ const LoginPopUp = () => {
   const dispatch = useDispatch();
   const [signUp, setSignUp] = useState(false);
   const url = useSelector((state) => state.categorySlice.url);
+  const token = useSelector((state) => state.categorySlice.token);
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -17,7 +18,7 @@ const LoginPopUp = () => {
   // useEffect(() => {
   //   console.log(data);
   // }, [data]);
-
+  console.log(token);
   const onChangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -35,6 +36,7 @@ const LoginPopUp = () => {
     console.log(link);
     const response = await axios.post(link, data);
     if (response.data.success) {
+      
       dispatch(setToken(response.data.token));
       localStorage.setItem("token", response.data.token);
       dispatch(setLogin());
@@ -42,6 +44,7 @@ const LoginPopUp = () => {
       alert(response.data.message);
     }
   };
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

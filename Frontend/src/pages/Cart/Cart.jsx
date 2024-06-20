@@ -1,18 +1,47 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { assets } from "../../Food Del Frontend Assets/assets/assets";
+import axios from "axios";
 import {
-  assets,
-} from "../../Food Del Frontend Assets/assets/assets";
-import { removeProduct } from "../../utils/CategorySlice";
+  decreaseProduct,
+  removeProduct,
+  setProductAdded,
+} from "../../utils/CategorySlice";
 
 const Cart = () => {
-  const productAdded = useSelector((state) => state.categorySlice.productAdded);
   const dispatch = useDispatch();
-  const foodlist=useSelector((state)=>state.categorySlice.foodlist)
+  const navigate = useNavigate();
+  const foodlist = useSelector((state) => state.categorySlice.foodlist);
+  const token = useSelector((state) => state.categorySlice.token);
+  const url = useSelector((state) => state.categorySlice.url);
   let total = 0;
+  const productAdded = useSelector((state) => state.categorySlice.productAdded);
+
   useEffect(() => {
-    console.log(productAdded);
-  }, []);
+    const fetchCartData = async () => {
+      try {
+        const response = await axios.post(
+          `${url}/get`,
+          {},
+          { headers: { token } }
+        );
+        dispatch(setProductAdded(response.data.cartData));
+      } catch (error) {
+        console.error("Error fetching cart data:", error);
+      }
+    };
+
+    if (token) {
+      fetchCartData();
+    }
+  }, [token, url, dispatch]);
+
+  const getQuantity = (id) => {
+    const product = productAdded.find((product) => product.id === id);
+    return product ? product.quantity : 0;
+  };
+
   return (
     <div className="container mx-auto my-8 p-4">
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
@@ -56,12 +85,19 @@ const Cart = () => {
                   <li className="md:w-1/6 flex items-center justify-center md:justify-start">
                     <button
                       onClick={() =>
-                        dispatch(removeProduct({ id: foodItem._id }))
+                        dispatch(
+                          decreaseProduct({
+                            id: foodItem._id,
+                            name: foodItem.name,
+                            price: foodItem.price,
+                            quantity: getQuantity(foodItem._id),
+                          })
+                        )
                       }
                     >
                       <img
                         className="h-6 w-6 cursor-pointer"
-                        src={assets.cross_icon}
+                        src={assets.remove_icon_red}
                         alt="Remove"
                       />
                     </button>
@@ -76,82 +112,6 @@ const Cart = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row justify-between">
-        <div className="py-10 lg:w-1/2 lg:pr-4">
-          <h1 className="text-2xl font-bold mb-4">Payment Details</h1>
-          <form>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="firstName"
-              >
-                First Name
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="firstName"
-                type="text"
-                placeholder="Enter your first name"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="lastName"
-              >
-                Last Name
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="lastName"
-                type="text"
-                placeholder="Enter your last name"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="phone"
-              >
-                Phone
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="phone"
-                type="text"
-                placeholder="Enter your phone number"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="email"
-              >
-                Email
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="address"
-              >
-                Address
-              </label>
-              <textarea
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="address"
-                rows="4"
-                placeholder="Enter your address"
-              ></textarea>
-            </div>
-          </form>
-        </div>
-
         <div className="mt-12 py-10 lg:mt-0 lg:w-1/2 lg:pl-4">
           <div className="p-4 bg-white shadow-md rounded-lg">
             <h1 className="text-2xl font-bold mb-4">Cart Totals</h1>
@@ -171,7 +131,10 @@ const Cart = () => {
                 ${total > 0 ? (total + 2).toFixed(2) : "0.00"}
               </div>
             </div>
-            <button className="w-full mt-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors">
+            <button
+              onClick={() => navigate("/payment")}
+              className="w-full mt-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+            >
               Proceed to Payment
             </button>
           </div>

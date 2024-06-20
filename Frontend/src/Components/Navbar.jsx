@@ -3,29 +3,25 @@ import { assets } from "../Food Del Frontend Assets/assets/assets";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import LoginPopUp from "./LoginPopUp";
 import { useDispatch, useSelector } from "react-redux";
-import { setLogin, setToken } from "../utils/CategorySlice";
+import {
+  getTotalProductAdded,
+  setLogin,
+  setToken,
+} from "../utils/CategorySlice";
 
 const Navbar = () => {
   const show = useSelector((state) => state.categorySlice.showLogin);
   const dispatch = useDispatch();
+  const TotalProductAdded = useSelector(
+    (state) => state.categorySlice.TotalProductAdded
+  );
   const productAdded = useSelector((state) => state.categorySlice.productAdded);
-  const [total, setTotal] = useState(0);
   const token = useSelector((state) => state.categorySlice.token);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  
-
   useEffect(() => {
-    if (productAdded) {
-      const calculatedTotal = productAdded.reduce(
-        (acc, item) => acc + item.quantity,
-        0
-      );
-      setTotal(calculatedTotal);
-    } else {
-      setTotal(0);
-    }
-  }, [productAdded]);
+    dispatch(getTotalProductAdded());
+  }, [dispatch, productAdded]);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -37,20 +33,18 @@ const Navbar = () => {
     dispatch(setToken(""));
     navigate("/");
   };
-  // when we are in loggedIn if we reload  then we are logout i.e our token is back to intial state but in local storage we have token to avoid this
+
+  // Ensure token persistence on page reload
   useEffect(() => {
-    if(localStorage.getItem("token")){
-      dispatch(setToken(localStorage.getItem("token")))
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      dispatch(setToken(storedToken));
     }
-  },[])
+  }, [dispatch]);
 
   return (
     <>
-      {show ? (
-        <div>
-          <LoginPopUp />
-        </div>
-      ) : null}
+      {show && <LoginPopUp />}
       <nav className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <img
@@ -104,10 +98,12 @@ const Navbar = () => {
                   alt="Basket"
                 />
               </Link>
-              {total > 0 && (
+              {TotalProductAdded > 0 ? (
                 <div className="absolute flex items-center justify-center min-w-[20px] min-h-[20px] bg-green-500 text-white font-bold rounded-full top-[-8px] right-[-8px]">
-                  {total}
+                  {TotalProductAdded}
                 </div>
+              ) : (
+                <></>
               )}
             </div>
             {token ? (
@@ -118,9 +114,12 @@ const Navbar = () => {
                   className="h-7 cursor-pointer"
                   onClick={toggleDropdown}
                 />
-                {dropdownOpen ? (
+                {dropdownOpen && (
                   <ul className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-10">
-                    <li className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100">
+                    <li
+                      onClick={() => navigate("/myorders")}
+                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
+                    >
                       <img
                         src={assets.bag_icon}
                         alt="Orders"
@@ -128,18 +127,18 @@ const Navbar = () => {
                       />
                       <span>Orders</span>
                     </li>
-                    <li onClick={logout} className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100">
+                    <li
+                      onClick={logout}
+                      className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
+                    >
                       <img
                         src={assets.logout_icon}
                         alt="Logout"
                         className="h-6 mr-2"
-                        
                       />
                       <span>Logout</span>
                     </li>
                   </ul>
-                ) : (
-                  <></>
                 )}
               </div>
             ) : (

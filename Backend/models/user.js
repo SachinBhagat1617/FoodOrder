@@ -20,10 +20,7 @@ const userSchema = new mongoose.Schema(
       minLength: [6, "password should be atleast 6 char"],
       select: false,
     },
-    cartData: {
-      type: Object,
-      default: {},
-    },
+    cartData: [],
     createdAt: {
       type: String,
       default: Date.now,

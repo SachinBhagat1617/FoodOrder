@@ -1,28 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { assets } from "../Food Del Frontend Assets/assets/assets";
 import { useDispatch, useSelector } from "react-redux";
-import { addProduct, decreaseProduct, setFoodlist } from "../utils/CategorySlice";
+import {
+  addProduct,
+  decreaseProduct,
+  setFoodlist,
+  setProductAdded,
+} from "../utils/CategorySlice";
 import axios from "axios";
+
 const FoodMenu = () => {
   const category = useSelector((state) => state.categorySlice.category);
   const dispatch = useDispatch();
-  const productAdded = useSelector((state) => state.categorySlice.productAdded);
   const url = useSelector((state) => state.categorySlice.url);
-  //const [foodlist, setFoodList] = useState([]);
+  const token = useSelector((state) => state.categorySlice.token);
   const foodlist = useSelector((state) => state.categorySlice.foodlist);
-  const fetchlist = async () => {
-    const response = await axios.get(url + "/admin/getAllProduct");
-    dispatch(setFoodlist(response.data.data));
-  };
+  //const [productAdded, setProductAdded] = useState([]);
+  const productAdded = useSelector((state) => state.categorySlice.productAdded);
   useEffect(() => {
-    fetchlist();
-  }, []);
+    const fetchCartData = async () => {
+      try {
+        const response = await axios.post(
+          `${url}/get`,
+          {},
+          { headers: { token } }
+        );
+        dispatch(setProductAdded(response.data.cartData));
+      } catch (error) {
+        console.error("Error fetching cart data:", error);
+      }
+    };
+
+    if (token) {
+      fetchCartData();
+    }
+  }, [token, url,dispatch]);
+
+  useEffect(() => {
+    const fetchFoodList = async () => {
+      try {
+        const response = await axios.get(`${url}/admin/getAllProduct`);
+        dispatch(setFoodlist(response.data.data));
+      } catch (error) {
+        console.error("Error fetching food list:", error);
+      }
+    };
+
+    fetchFoodList();
+  }, [dispatch, url]);
+
   const getQuantity = (id) => {
     const product = productAdded.find((product) => product.id === id);
     return product ? product.quantity : 0;
   };
-  // console.log(productAdded);
-  // console.log(foodlist);
+
   return (
     <div className="p-4 sm:p-8 md:p-12">
       <h1 className="text-2xl font-bold mb-6 text-center">
@@ -50,7 +81,7 @@ const FoodMenu = () => {
                           id: item._id,
                           name: item.name,
                           price: item.price,
-                          quantity: item.quantity,
+                          quantity: getQuantity(item._id),
                         })
                       )
                     }
@@ -59,7 +90,16 @@ const FoodMenu = () => {
                   />
                   {getQuantity(item._id)}
                   <img
-                    onClick={() => dispatch(decreaseProduct({ id: item._id }))}
+                    onClick={() =>
+                      dispatch(
+                        decreaseProduct({
+                          id: item._id,
+                          name: item.name,
+                          price: item.price,
+                          quantity: getQuantity(item._id),
+                        })
+                      )
+                    }
                     src={assets.remove_icon_red}
                     alt="Remove"
                   />
