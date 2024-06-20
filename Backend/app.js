@@ -4,7 +4,7 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const morgan = require("morgan");
-
+const path = require("path");
 //app config
 const app = express();
 app.use(express.json()); // app.use to mount the routes
