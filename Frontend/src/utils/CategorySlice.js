@@ -7,7 +7,7 @@ const initialState = {
   token: "",
   showLogin: false,
   totProduct: 0,
-  url: "http://localhost:4000/api/v1",
+  url: "https://food-order-red.vercel.app/",
   foodlist: [],
   fetchdata: [],
   TotalProductAdded: 0,
@@ -20,7 +20,7 @@ const addCartData = async (id, name, quantity, price, token) => {
     quantity,
     price,
   };
-  await axios.post("http://localhost:4000/api/v1/add", data, {
+  await axios.post("https://food-order-red.vercel.app/api/v1/add", data, {
     headers: { token },
   });
 };
@@ -32,7 +32,7 @@ const decreaseCartData = async (id, name, quantity, price, token) => {
     quantity,
     price,
   };
-  await axios.post("http://localhost:4000/api/v1/remove", data, {
+  await axios.post("https://food-order-red.vercel.app/api/v1/remove", data, {
     headers: { token },
   });
 };
