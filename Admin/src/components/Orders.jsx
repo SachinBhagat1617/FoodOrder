@@ -89,7 +89,7 @@ const Orders = ({ url }) => {
                 </select>
               </p>
               <p className="text-sm">Number of Items: {order.items.length}</p>
-              <p className="text-sm">Total Amount: ${order.amount / 100}</p>
+              <p className="text-sm">Total Amount: ₹{order.amount / 100}</p>
             </div>
           </div>
         </div>
